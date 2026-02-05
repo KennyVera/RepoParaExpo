@@ -21,7 +21,7 @@ public class OfertaController {
     @PostMapping("/guardar")
     public ResponseEntity<?> guardarOferta(@RequestBody OfertaLaboral nuevaOferta) {
         try {
-            // El BINGO: Guardamos la oferta que viene de JUSEPEMEASPA
+            //  Guardamos la oferta que viene de del Usuario
             OfertaLaboral guardada = ofertaLaboralRepository.save(nuevaOferta);
             return ResponseEntity.ok(guardada);
         } catch (Exception e) {

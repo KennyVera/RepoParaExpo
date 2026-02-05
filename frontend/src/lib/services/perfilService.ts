@@ -10,14 +10,14 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
         credentials: 'include'
     });
 
-    // 1. Manejo de errores (mantenemos tu lógica pero con un catch más seguro)
+
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Error en la petición al servidor');
     }
 
-    // 2. NUEVO: Verificar si hay contenido antes de intentar parsear JSON
-    // El status 204 significa "No Content"
+
+
     if (response.status === 204) {
         return null;
     }
@@ -84,5 +84,31 @@ export const perfilService = {
             // Convertimos el objeto de Svelte a un JSON que Spring Boot pueda entender
             body: JSON.stringify(datos)
         });
-    }
+    },
+
+
+	async getPostulantesPorEmpresa(idEmpresa: string | number) {
+		// Añadimos /api al inicio de la ruta
+		return apiFetch(`/postulaciones/empresa/${idEmpresa}/postulantes`, {
+			method: 'GET'
+		});
+	},
+
+	async getOfertasPorPostulante(idUsuarioPostulante: number, idUsuarioEmpresa: string | number) {
+		// La ruta debe llevar el query param ?idUsuarioEmpresa=...
+		return apiFetch(`/postulaciones/usuario/${idUsuarioPostulante}/ofertas?idUsuarioEmpresa=${idUsuarioEmpresa}`, {
+			method: 'GET'
+		});
+	},
+
+	async actualizarEstadoPostulacion(idPostulacion: number, nuevoEstado: string) {
+		// Añadimos /api al inicio de la ruta
+		return apiFetch(`/postulaciones/actualizar-estado/${idPostulacion}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ estado: nuevoEstado })
+		});
+	}
 };

@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { page } from '$app/state'; // Para saber en qué ruta estamos
 
     let { children } = $props();
 
@@ -23,6 +22,7 @@
         { icon: 'business', title: 'Perfil Empresarial', color: 'from-blue-500 to-blue-600', roles: ['EMPRESA'], path: '/menu-principal/empresa' },
         { icon: 'search', title: 'Búsqueda de Empleos', color: 'from-cyan-500 to-cyan-600', roles: ['POSTULANTE'], path: '/menu-principal/buscar' },
         { icon: 'work', title: 'Gestión de Ofertas', color: 'from-cyan-500 to-cyan-600', roles: ['EMPRESA'], path: '/menu-principal/ofertas' },
+        { icon: 'person', title: 'Ver Postulaciones', color: 'from-cyan-500 to-cyan-600', roles: ['EMPRESA'], path: '/menu-principal/Postulaciones' },
         { icon: 'logout', title: 'Cerrar Sesión', color: 'from-red-500 to-red-600', roles: ['EMPRESA', 'POSTULANTE'], action: logout }
     ].filter(item => item.roles.includes(rolUsuario)));
 
