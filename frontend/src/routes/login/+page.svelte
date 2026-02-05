@@ -1,0 +1,275 @@
+<script lang="ts">
+
+    let correo = $state('');
+    let contrasena = $state('');
+    let verPassword = $state(false);
+    let errorMsg = $state('');
+
+    function togglePassword() {
+        verPassword = !verPassword;
+    }
+
+    async function onLogin() {
+        errorMsg = '';
+        const loginData = { correo, contrasena };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData)
+            });
+
+            if (response.ok) {
+                const res = await response.json();
+                console.log('Respuesta backend:', res);
+
+                // 1. GUARDAR DATOS (Igual que en tu TS de Angular)
+                localStorage.setItem('idUsuario', res.idUsuario);
+                localStorage.setItem('nombre', res.nombre);
+
+                let rolNombre = '';
+                if (res.rol && typeof res.rol === 'object') {
+                    rolNombre = res.rol.nombreRol || res.rol.nombre || '';
+                } else {
+                    rolNombre = res.rol || '';
+                }
+                localStorage.setItem('rol', rolNombre.trim().toUpperCase());
+
+                window.location.href = '/menu-principal';
+            } else {
+                const err = await response.json();
+                errorMsg = err.error || 'Error de conexión con el servidor.';
+            }
+        } catch (e) {
+            errorMsg = 'Error de red o servidor apagado.';
+        }
+    }
+</script>
+
+<div class="container">
+    <div class="info-side">
+        <div class="info-content">
+            <img src="https://img.icons8.com/?size=100&id=72272&format=png&color=000000" alt="Icono Login" class="main-icon">
+            <h1>Bienvenido de Nuevo</h1>
+            <p>Accede a tu cuenta para gestionar tus postulaciones o publicar nuevas ofertas laborales.</p>
+        </div>
+    </div>
+
+    <div class="form-side">
+        <h2>Iniciar Sesión</h2>
+        <p class="subtitle">Ingresa tus credenciales para continuar.</p>
+
+        <form onsubmit={onLogin}>
+            <div class="input-group">
+                <label for="correo">CORREO ELECTRÓNICO</label>
+                <input
+                        type="email"
+                        id="correo"
+                        bind:value={correo}
+                        placeholder="usuario@email.com"
+                        required>
+            </div>
+
+            <div class="input-group">
+                <label for="pass">CONTRASEÑA</label>
+                <div class="password-wrapper">
+                    <input
+                            type={verPassword ? 'text' : 'password'}
+                            id="pass"
+                            bind:value={contrasena}
+                            placeholder="********"
+                            required>
+
+                    <button type="button" class="toggle-password" onclick={togglePassword}>
+                        {verPassword ? '🙈' : '👁️'}
+                    </button>
+                </div>
+            </div>
+
+            {#if errorMsg}
+                <p class="error">{errorMsg}</p>
+            {/if}
+
+            <button type="submit" class="btn-login" disabled={!correo || !contrasena}>
+                Entrar
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Reset y Estilos Base */
+    * {
+        box-sizing: border-box;
+        margin: 0; padding: 0;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    body {
+        background-color: #eef2f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* Contenedor Principal */
+    .container {
+        display: flex;
+        width: 850px;
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    /* Panel Izquierdo (Información) */
+    .info-side {
+        flex: 1;
+        background-color: #0056b3;
+        color: white;
+        padding: 40px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+    .info-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-icon {
+        width: 120px;
+        margin-bottom: 25px;
+        display: block;
+    }
+
+    .info-side h1 { font-size: 2rem; margin-bottom: 15px; }
+
+    /* Panel Derecho (Formulario) */
+    .form-side {
+        flex: 1.2;
+        padding: 50px 40px;
+    }
+
+    .form-side h2 { color: #333; margin-bottom: 5px; }
+    .subtitle { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 30px; }
+
+    /* Grupos de Entrada */
+    .input-group { margin-bottom: 20px; }
+
+    .input-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dcdde1;
+        border-radius: 10px;
+        background: #f9f9f9;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .input-group input:focus {
+        border-color: #34495e;
+        background: #fff;
+        box-shadow: 0 0 8px rgba(52, 73, 94, 0.1);
+    }
+
+
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+
+    .password-wrapper input {
+        padding-right: 45px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2rem;
+        user-select: none;
+        transition: transform 0.2s ease;
+    }
+
+    .toggle-password:active {
+        transform: translateY(-50%) scale(0.9);
+    }
+
+    /* Botón de Login */
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-login:hover:not(:disabled) {
+        background-color: #1a252f;
+    }
+
+    /* Estado Deshabilitado */
+    .btn-login:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* Enlaces del Footer */
+    .footer-links {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        line-height: 1.6;
+    }
+
+    .footer-links a {
+        color: #2980b9;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+        text-decoration: underline;
+        color: #1a252f;
+    }
+
+    /* Responsivo dddddd*/
+    @media (max-width: 768px) {
+        .container { flex-direction: column; width: 90%; }
+        .info-side { padding: 30px; }
+        .info-side h1 { font-size: 1.5rem; }
+    }
+
+    /* Aquí pega el CSS que tenías en Angular, funcionará igual */
+    .password-wrapper { position: relative; display: flex; align-items: center; }
+    .toggle-password { position: absolute; right: 10px; background: none; border: none; cursor: pointer; }
+    .error { color: red; font-size: 0.8rem; }
+</style>
